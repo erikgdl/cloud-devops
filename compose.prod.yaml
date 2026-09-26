@@ -1,0 +1,10 @@
+services:
+  web:
+    image: ${IMAGE_NAME}
+
+    container_name: devops-site
+
+    ports:
+      - "80:80"
+
+    restart: unless-stopped
