@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: devops-site
+
+    ports:
+      - "8080:80"
+
+    restart: unless-stopped
