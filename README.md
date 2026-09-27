@@ -1,16 +1,38 @@
-# React + Vite
+# Cloud Devops
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação web que apresenta, de forma interativa, as etapas de um projeto DevOps. Desenvolvida com React e Vite, é distribuída como imagem Docker e publicada em uma VPS Ubuntu 24.04 na KingHost.
 
-Currently, two official plugins are available:
+- [Aplicação](https://devops.erikgdl.xyz)
+- [Monitoramento](https://monitor.erikgdl.xyz)
+- [Documentação técnica completa](docs/README.md)
+- [Repositório](https://github.com/erikgdl/cloud-devops)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Arquitetura
+```text
+GitHub → GitHub Actions CD → GHCR → Docker na VPS
+Navegador → DNS → Nginx/HTTPS da VPS → Nginx do container → React
+Uptime Kuma → consultas HTTPS → histórico de disponibilidade
+```
+O CI valida o build da aplicação e da imagem. O CD publica a imagem e atualiza o container por SSH em pushes na master. Os dois workflows são independentes.
 
-## React Compiler
+## Tecnologias
+React 19, Vite 8, Node.js 22, Docker multi-stage, Docker Compose, Nginx, GitHub Actions, GHCR, Ubuntu 24.04 LTS, SSH, UFW, Certbot/Let's Encrypt e Uptime Kuma v2.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Executar localmente
+Com Node.js 22 e npm, na raiz:
+```bash
+npm ci
+npm run dev
+```
+Ou, com Docker e Compose:
+```bash
+docker compose -f docker-compose.yaml up -d --build
+```
+A versão em container fica em http://localhost:8080.
 
-## Expanding the ESLint configuration
+## Produção e validações
+A imagem usa Node.js para compilar e Nginx para servir o resultado. Em produção, a porta da aplicação é publicada somente em `127.0.0.1:8080`, atrás do reverse proxy da VPS.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+As evidências documentam CI/CD concluídos, publicação no GHCR, DNS, certificados, teste de renovação e monitoramento. O teste de recuperação registra a sequência `200 OK → 502 → 200 OK`.
+
+Consulte o [índice técnico](docs/README.md) para instalação, deploy, Docker, DNS, HTTPS, CI/CD, monitoramento e recuperação. Os prints estão em `docs/evidencias/`; representam o momento da coleta.
