@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - feature/docker-ci-cd
 
   pull_request:
     branches:
