@@ -1,31 +1,34 @@
 # 03 — Tecnologias utilizadas
 
-| Tecnologia | Uso neste projeto |
+| Tecnologia | Responsabilidade no projeto |
 | --- | --- |
-| React 19 | Interface baseada em componentes |
-| Vite 8 | Servidor de desenvolvimento e build estático |
-| Node.js 22 e npm | Instalação das dependências e compilação |
-| Git e GitHub | Versionamento e hospedagem do código |
-| Docker | Imagem e execução isolada da aplicação |
-| Docker Compose | Definição do serviço web em desenvolvimento e produção |
-| Nginx na imagem | Entrega dos arquivos estáticos |
-| Nginx na VPS | Reverse proxy dos dois domínios e terminação TLS |
-| Ubuntu 24.04 LTS / KingHost | Sistema operacional e infraestrutura cloud |
-| OpenSSH / ED25519 | Acesso remoto autenticado por chave |
-| UFW | Regras de entrada para SSH, HTTP e HTTPS |
-| GitHub Actions | Workflows CI e CD |
-| GHCR | Armazenamento da imagem cloud-devops |
-| GitHub Secrets | Valores usados na conexão SSH da automação |
-| Certbot / Let's Encrypt | Gerenciamento e emissão de certificados TLS |
-| Uptime Kuma v2 | Monitoramento HTTP(s), disponibilidade e histórico |
+| React | Interface baseada em componentes, executada no navegador |
+| Vite | Desenvolvimento local e geração dos arquivos estáticos |
+| Node.js 22 e npm | Instalação de dependências e build |
+| Git e GitHub | Commits, branches, pull requests e hospedagem do código |
+| Docker | Construção de imagens e execução de containers |
+| Docker Compose | Definição do serviço da aplicação nos ambientes local e de produção |
+| Nginx no container | Entrega de `dist/` por HTTP |
+| Nginx no host | Reverse proxy e terminação TLS |
+| Ubuntu 24.04 LTS / KingHost | Sistema operacional e infraestrutura da VPS |
+| SSH | Administração e deploy remoto com autenticação por chave |
+| UFW | Administração das regras de firewall do host |
+| GitHub Actions | Automação de CI e CD |
+| GHCR | Registro de imagens Docker associado ao GitHub |
+| GitHub Secrets | Armazenamento dos valores sensíveis usados pela automação |
+| Certbot / Let's Encrypt | Gerenciamento e emissão dos certificados TLS |
+| Uptime Kuma v2 | Monitor HTTP(s) e histórico de disponibilidade |
 
-As versões principais de React e Vite vêm do `package.json`; o `package-lock.json` fixa as dependências usadas por `npm ci`. O Dockerfile usa `node:22-alpine` e `nginx:alpine`. A evidência dos containers mostra `louislam/uptime-kuma:2`.
+## Versões e dependências
 
-## Como as ferramentas se complementam
-O Vite transforma o código React em arquivos estáticos. O Docker empacota o resultado com Nginx. O CD publica a imagem no GHCR e atualiza sua execução na VPS. DNS e HTTPS fornecem acesso pelo domínio, enquanto o Kuma acompanha a resposta da aplicação.
+O Dockerfile usa `node:22-alpine` no build e `nginx:alpine` na imagem final. A evidência de execução mostra `louislam/uptime-kuma:2` para o monitor. Essas tags não fixam um digest imutável; reconstruções ou atualizações podem obter revisões diferentes.
 
-O ESLint está configurado no projeto e possui o script `npm run lint`, mas esse script não é executado no workflow CI atual.
+As versões exatas de React, Vite e dependências devem ser consultadas no `package.json` e no `package-lock.json` do código-fonte. `npm ci` instala a árvore definida pelo lockfile e exige sua compatibilidade com o manifesto.
 
-## Evidências
-![Dockerfile e imagens base](evidencias/14-dockerfile.png)
-![Imagem publicada no GHCR](evidencias/10-ghcr-imagem.png)
+## Conceitos usados na operação
+
+- **Imagem e container:** a imagem empacota os arquivos e a configuração; o container é uma instância criada a partir dela. Publicar uma imagem no GHCR não atualiza sozinho o container da VPS.
+- **Reverse proxy:** o Nginx recebe a conexão pública e faz outra requisição ao serviço interno. Isso centraliza o acesso por domínio e o HTTPS.
+- **CI e CD:** o CI valida a construção do projeto; o CD publica a imagem e aplica a atualização em produção. Os gatilhos e limites estão em [CI/CD](10-processo-ci-cd.md).
+
+[Índice](README.md) · [Estrutura do projeto](04-estrutura-do-projeto.md)

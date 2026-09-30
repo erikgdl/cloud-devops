@@ -1,5 +1,9 @@
 # 04 — Estrutura do projeto
 
+## Organização
+
+O projeto separa o código da interface, as configurações de execução, os workflows de automação e a documentação técnica.
+
 ```text
 cloud-devops/
 ├── .github/workflows/
@@ -7,7 +11,10 @@ cloud-devops/
 │   └── cd.yml
 ├── docs/
 │   ├── README.md
-│   ├── 01-descricao-da-aplicacao.md ... 12-recuperacao.md
+│   ├── 01-descricao-da-aplicacao.md
+│   ├── ...
+│   ├── 12-recuperacao.md
+│   ├── 13-conclusao.md
 │   └── evidencias/
 ├── public/
 ├── src/
@@ -33,23 +40,33 @@ cloud-devops/
 ```
 
 ## Responsabilidades
-- `components/`: cabeçalho, ícones e controles da apresentação.
-- `sections/`: conteúdo das quatro seções da interface.
-- `hooks/`: comportamento da navegação horizontal.
-- `data/`: dados e endereço do repositório usados pela interface.
-- `styles/` e `index.css`: apresentação visual.
-- `main.jsx`: inicialização do React; `App.jsx`: composição da tela.
-- `public/`: arquivos estáticos que podem ser copiados pelo Vite.
-- `.github/workflows/`: validação e entrega automática.
-- `Dockerfile`: construção da imagem.
-- `docker-compose.yaml`: build e execução local.
-- `compose.prod.yaml`: execução da imagem publicada em produção.
-- `docs/`: explicações técnicas e evidências.
 
-`node_modules/` contém dependências instaladas; `dist/` é gerado pelo build. Ambos são excluídos do contexto Docker. O `.dockerignore` também exclui `.git`, `.env` e `.env.*`.
+| Caminho | Função |
+| --- | --- |
+| `src/` | Código da interface, componentes, conteúdo, hooks e estilos |
+| `public/` | Recursos estáticos da aplicação |
+| `package.json` / `package-lock.json` | Scripts, dependências e resolução das versões |
+| `Dockerfile` | Build multi-stage da distribuição |
+| `docker-compose.yaml` | Construção e execução local |
+| `compose.prod.yaml` | Execução da imagem do GHCR, com porta em localhost |
+| `.github/workflows/` | Validação e publicação automatizadas |
+| `docs/` | Referência técnica e evidências |
 
-## Estrutura na VPS
-O CD cria `~/devops-app` na conta de deploy e copia `compose.prod.yaml` como `~/devops-app/compose.yaml`. Assim, o Compose remoto descobre o arquivo pelo nome padrão. O código-fonte não precisa ser clonado na VPS para esse fluxo.
+`node_modules/` é gerado pela instalação de dependências; `dist/` é gerado pelo build. O `.dockerignore` controla os arquivos enviados ao build Docker. Ao alterar o contexto de build, confira as exclusões para evitar o envio de arquivos de ambiente ou credenciais.
+
+## Organização na VPS
+
+O CD utiliza o diretório `~/devops-app` na conta `deploy` e envia `compose.prod.yaml` com o nome remoto `compose.yaml`:
+
+```text
+~/devops-app/
+└── compose.yaml
+```
+
+Esse nome permite executar `docker compose` dentro do diretório sem `-f`. A imagem é obtida pelo GHCR; o fluxo não depende de clonar o código-fonte na VPS. Nginx do host, certificados e Kuma são administrados separadamente do Compose da aplicação.
 
 ## Evidência
-![Estrutura real do projeto](evidencias/17-estrutura-projeto.png)
+
+![Estrutura do projeto no ambiente de desenvolvimento](evidencias/17-estrutura-projeto.png)
+
+[Índice](README.md) · [Instalação, VPS e segurança](05-processo-de-instalacao.md)

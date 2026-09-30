@@ -1,30 +1,37 @@
 # 08 — Configuração DNS
 
-## Objetivo
-Associar nomes legíveis ao IPv4 público da VPS. DNS resolve o endereço; o Nginx decide qual serviço atende cada domínio.
+## Registros do ambiente
 
-| Nome | Tipo | Destino do ambiente |
+DNS associa os nomes dos serviços ao endereço da VPS. Um registro **A** aponta um nome para um endereço IPv4.
+
+| Nome | Tipo | Destino |
 | --- | --- | --- |
-| devops.erikgdl.xyz | A | 177.153.20.8 |
-| monitor.erikgdl.xyz | A | 177.153.20.8 |
+| `devops.erikgdl.xyz` | A | `177.153.20.8` |
+| `monitor.erikgdl.xyz` | A | `177.153.20.8` |
 
-O domínio base é `erikgdl.xyz`. Os dois subdomínios compartilham a VPS, com encaminhamento separado para aplicação e monitoramento.
+Os dois serviços compartilham o mesmo IP. Depois da resolução, o navegador se conecta ao Nginx da VPS, que seleciona o serviço pelo domínio. DNS não escolhe a porta do container e não configura HTTPS.
 
-```text
-Nome de domínio → resolução DNS → 177.153.20.8
-→ Nginx da VPS → serviço correspondente
-```
+Os dois domínios possuem certificados TLS próprios e são encaminhados pelo Nginx aos respectivos serviços.
 
-## Validação registrada
+## Verificação operacional
+
+Em um computador com acesso à rede:
+
 ```bash
 nslookup devops.erikgdl.xyz
+nslookup monitor.erikgdl.xyz
 ```
-O print registra a resolução do subdomínio da aplicação. O endereço do monitor faz parte do ambiente informado e consta no certificado emitido; não há um print separado de consulta DNS do monitor neste conjunto.
 
-Após alteração de registros, caches DNS podem manter respostas anteriores até expirar o TTL. O TTL e o painel de gestão da zona não foram recuperados nos arquivos consultados.
+Confira o IP retornado para o nome consultado. O endereço do servidor DNS mostrado por `nslookup` identifica o resolvedor utilizado, não a VPS da aplicação.
 
-## Relação com HTTPS
-A resolução correta permite que navegador e validação de domínio cheguem ao servidor. O registro A não configura certificado nem reverse proxy: essas etapas são descritas em [HTTPS](09-configuracao-https.md).
+Após alterações na zona, respostas antigas podem permanecer em cache até expirar o TTL. Confira esse valor no provedor DNS. Se o IP da VPS mudar, atualize ambos os registros e revise a configuração de acesso usada no deploy.
+
+## Relação com os demais serviços
+
+Resolver o nome é uma condição necessária, mas não garante aplicação saudável. Com DNS correto, ainda podem ocorrer problemas no firewall, certificado, Nginx ou container. O [fluxo de requisição](09-configuracao-https.md) mostra essas camadas; a [recuperação](12-recuperacao.md) organiza o diagnóstico.
 
 ## Evidência
-![Consulta DNS da aplicação](evidencias/05-dns.png)
+
+![Resolução do domínio da aplicação para o IP público da VPS](evidencias/05-dns.png)
+
+[Índice](README.md) · [Nginx e HTTPS](10-processo-ci-cd.md)
